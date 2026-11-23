@@ -8,7 +8,7 @@ ZhiJin Chen<sup>4</sup>, Ruiqi Liu<sup>4</sup>, Junfei Wu<sup>4</sup>, Huanyu Zh
 <sup>1</sup>Jilin University, <sup>2</sup>Shanghai Jiao Tong University, <sup>3</sup>Huazhong University of Science and
 Technology, <sup>4</sup>Institute of Automation, Chinese Academy of Sciences. <sup>†</sup>Corresponding author.
 
-[Project page](https://wangzian828.github.io/PersistWorld) · [Weights](https://github.com/wangzian828/PersistWorld/releases/download/v1.0.0/persistworld_main.pt) · Paper: arXiv (link follows)
+[Project page](https://wangzian828.github.io/PersistWorld) · [Weights](https://huggingface.co/ZiAnwang/PersistWorld) · Paper: arXiv (link follows)
 
 PersistWorld streams camera frames into a 3D world state anchored in the scene. When a capture group of
 surround-view images arrives, the **Evolver** carries the state to its capture time, the **Writer** writes the
@@ -82,7 +82,13 @@ The class priors of the objective are in the config; `tools/compute_priors.py` r
 |---|---|---|---|
 | PersistWorld (camera) | 28.72 / 67.82 | 23.86 / 64.73 | `persistworld_main.pt` |
 
-Download [`persistworld_main.pt`](https://github.com/wangzian828/PersistWorld/releases/download/v1.0.0/persistworld_main.pt) into `checkpoints/`. A checkpoint holds the trainable parameters only;
+Download [`persistworld_main.pt`](https://huggingface.co/ZiAnwang/PersistWorld) from Hugging Face (also on the [GitHub release](https://github.com/wangzian828/PersistWorld/releases/download/v1.0.0/persistworld_main.pt)) into `checkpoints/`:
+
+```bash
+huggingface-cli download ZiAnwang/PersistWorld persistworld_main.pt --local-dir checkpoints
+```
+
+A checkpoint holds the trainable parameters only;
 the frozen DINOv3 blocks come from the pretrained weights above.
 
 ## Evaluation

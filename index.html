@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PersistWorld · Write, Evolve, Read: Streaming Cameras into a Persistent World State for 4D Occupancy Forecasting</title>
+<meta name="description" content="PersistWorld streams camera frames into a persistent 3D world state anchored in the scene and forecasts 3D semantic occupancy up to 8 s ahead.">
+<meta property="og:title" content="PersistWorld: Streaming Cameras into a Persistent World State for 4D Occupancy Forecasting">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wangzian828.github.io/PersistWorld/">
+<meta property="og:image" content="https://wangzian828.github.io/PersistWorld/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wrap row">
+    <a class="brand" href="#top">PersistWorld</a>
+    <div class="navlinks">
+      <a href="#why">Motivation</a><a href="#method">Method</a><a href="#viewer">Explore</a><a href="#results">Results</a><a href="#bib">Citation</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <h1>Write, Evolve, Read: Streaming Cameras into a Persistent&nbsp;World&nbsp;State for 4D&nbsp;Occupancy&nbsp;Forecasting</h1>
+    <p class="authors">
+      <span>ZiAn Wang<sup>1</sup></span><span>Tianyi Wang<sup>2</sup></span><span>Zhihao Chen<sup>1</sup></span>
+      <span>Manni Cui<sup>3</sup></span><span>Junkai Chen<sup>4</sup></span><span>ZhiJin Chen<sup>4</sup></span>
+      <span>Ruiqi Liu<sup>4</sup></span><span>Junfei Wu<sup>4</sup></span><span>Huanyu Zhang<sup>4</sup></span>
+      <span>Shu Wu<sup>4,†</sup></span>
+    </p>
+    <p class="affil">
+      <span><sup>1</sup>Jilin University</span><span><sup>2</sup>Shanghai Jiao Tong University</span>
+      <span><sup>3</sup>Huazhong University of Science and Technology</span>
+      <span><sup>4</sup>Institute of Automation, Chinese Academy of Sciences</span>
+      <span class="corr"><sup>†</sup>Corresponding author</span>
+    </p>
+    <div class="links">
+      <a class="btn" href="#" aria-disabled="true">Paper</a>
+      <a class="btn" href="https://github.com/wangzian828/PersistWorld">Code</a>
+      <a class="btn" href="#" aria-disabled="true">Weights</a>
+      <a class="btn" id="video-btn" href="#video" hidden>Video</a>
+      <a class="btn ghost" href="#bib">BibTeX</a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="wrap">
+  <figure class="card-fig teaser">
+    <img src="img/teaser.webp" alt="Ground-truth occupancy of a driving scene 3 s ahead, colored by unchanged, changed and unseen space">
+  </figure>
+  <p class="cap center">Ground-truth occupancy 3 s after the last input frame. <b class="c-unch">Blue</b> was seen in the input frames and is
+    unchanged, <b class="c-chg">orange</b> was seen but has changed, <b class="c-uns">green</b> was never seen.
+    Under each label: IoU of SparseWorld-TC and ours.</p>
+
+  <div class="stats">
+    <div><b>+19.13</b><span>IoU over the best camera-based world model, 1–3 s</span></div>
+    <div><b>+18 to +24</b><span>IoU at every horizon up to 8 s, one model</span></div>
+    <div><b>2.5×</b><span>faster: 23.15 vs 9.36 FPS, no perception network</span></div>
+  </div>
+</section>
+
+<section class="wrap block" id="why">
+  <p class="eyebrow">Motivation</p>
+  <h2>Camera-based world models forget what they have seen</h2>
+  <p class="lead">Over a few seconds a driving scene changes little while the vehicle moves through it, so most of the space ahead has
+    already been seen by the cameras. Sorting the future into <b class="c-unch">unchanged</b>, <b class="c-chg">changed</b>, and
+    <b class="c-uns">unseen</b> space shows that current camera-based world models fall short on the space they have already seen,
+    not on forecasting what will change.</p>
+  <div class="grid2 why">
+    <figure class="card-fig"><img src="img/diagnosis.webp" alt="Two questions sort every occupied future voxel into unchanged, changed or unseen space">
+      <figcaption>Two questions sort every occupied future voxel. One second ahead, four fifths of it is unchanged space.</figcaption></figure>
+    <figure class="card-fig"><img src="img/space_split.webp" alt="IoU by kind of space and by visibility">
+      <figcaption>IoU over 1–3 s. On unchanged space SparseWorld-TC reaches 51.07 and PersistWorld 70.86; on unseen space, 40.92 and 62.71.</figcaption></figure>
+  </div>
+</section>
+
+<section class="wrap block" id="method">
+  <p class="eyebrow">Method</p>
+  <h2>Write, evolve, read a persistent world state</h2>
+  <p class="lead">PersistWorld makes what it has seen its state: a 3D world state on a lattice anchored in the scene, written directly
+    from camera images and learned end to end with the forecast. The state is updated as a stream, once per capture group, so each
+    image is processed once and no separate perception network is needed.</p>
+  <figure class="card-fig"><img src="img/overview.webp" alt="Overview of PersistWorld: Writer, Evolver and Reader around a persistent world state"></figure>
+  <div class="grid3">
+    <div class="card"><h3><i>W</i>Writer</h3><p>Samples image features at the projection of every sub-cell and writes the evidence of
+      each new frame into the state, guided by a predicted ray depth.</p></div>
+    <div class="card"><h3><i>E</i>Evolver</h3><p>Carries the state to any queried time along the ego trajectory. One model serves every
+      horizon from 1 to 8 s.</p></div>
+    <div class="card"><h3><i>R</i>Reader</h3><p>Decodes the state into 3D semantic occupancy at 0.4 m in the queried ego frame, now
+      and for every forecast.</p></div>
+  </div>
+</section>
+
+<section class="block viewer-sec" id="viewer">
+  <div class="wrap">
+    <p class="eyebrow">Interactive</p>
+    <h2>Explore the forecasts</h2>
+    <p class="lead">Pick a validation scene and a last input frame t₀, then move the horizon. <b>Errors</b> colours each forecast against the
+      ground truth: grey voxels are right, red ones were missed, amber ones are false. The three views share one camera:
+      drag to orbit, scroll to zoom. Only voxels inside the camera mask of the target frame, the evaluated region, are drawn.</p>
+
+    <div class="viewer-card">
+      <div class="vtop">
+        <div id="scene-bar" class="tabs"></div>
+        <div class="modes"><button class="mode-btn" data-m="err">Errors</button><button class="mode-btn" data-m="sem">Semantics</button></div>
+        <button id="reset-view" class="btn small ghost">Reset view</button>
+      </div>
+      <div class="viewer-box">
+        <canvas id="occ-canvas"></canvas>
+        <div class="panels">
+          <div class="panel" id="p-gt"><span class="tag">Ground truth</span></div>
+          <div class="panel" id="p-ours"><span class="tag ours">PersistWorld (ours)<b id="iou-ours"></b></span></div>
+          <div class="panel" id="p-tc"><span class="tag">SparseWorld-TC<b id="iou-tc"></b></span><span class="na-note">not available for this frame</span></div>
+        </div>
+        <span id="viewer-status" class="status"></span>
+      </div>
+      <div class="vctl">
+        <button id="play" class="btn small play">▶ Play</button>
+        <label class="ctl"><span>Last input frame <b id="t-label"></b></span><input id="anchor" type="range" min="0" max="10" step="1"></label>
+        <label class="ctl"><span>Horizon <b id="h-label"></b></span><input id="horizon" type="range" min="0" max="8" step="1"><span id="hz-ticks" class="hz-ticks"></span></label>
+      </div>
+      <div class="vbottom">
+        <figure class="cam"><img id="cam-in" alt="front camera at the last input frame"><figcaption>Front camera at t₀, the last input</figcaption></figure>
+        <figure class="cam"><img id="cam-out" alt="front camera at the target frame"><figcaption id="cam-out-label"></figcaption></figure>
+        <div class="vside">
+          <p id="scene-note" class="scene-note"></p>
+          <div id="legend" class="legend"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap block" id="results">
+  <p class="eyebrow">Results</p>
+  <h2>State of the art on Occ3D-nuScenes, at twice the speed</h2>
+  <div class="grid2 results">
+    <div class="card tables">
+      <table class="res">
+        <thead><tr><th>Camera-based, 1–3 s</th><th>mIoU</th><th>IoU</th><th>FPS</th></tr></thead>
+        <tbody>
+          <tr><td>I²-World-STC</td><td>23.95</td><td>40.63</td><td>2.87</td></tr>
+          <tr><td>GAST-STC</td><td>24.70</td><td>42.47</td><td>3.48</td></tr>
+          <tr><td>SparseWorld-TC</td><td>25.40</td><td>48.69</td><td>9.36</td></tr>
+          <tr class="ours"><td>PersistWorld (ours)</td><td>28.72</td><td>67.82</td><td>23.15</td></tr>
+        </tbody>
+      </table>
+      <table class="res">
+        <thead><tr><th>Camera-based, 1–8 s</th><th>mIoU</th><th>IoU</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>SparseWorld-TC</td><td>19.65</td><td>43.15</td><td></td></tr>
+          <tr class="ours"><td>PersistWorld (ours)</td><td>23.86</td><td>64.73</td><td></td></tr>
+        </tbody>
+      </table>
+      <p class="cap">-STC: forecasts from the occupancy predicted by STCOcc; their FPS includes that perception network.
+        Speeds on one A800, batch size one.</p>
+    </div>
+    <figure class="card-fig"><img src="img/speed_accuracy.webp" alt="Speed and accuracy of forecasters">
+      <figcaption>Speed and accuracy. Bubble area: IoU averaged over 1–3 s.</figcaption></figure>
+  </div>
+</section>
+
+<section class="wrap block" id="video" hidden>
+  <p class="eyebrow">Video</p>
+  <h2>PersistWorld in 75 seconds</h2>
+  <video class="card-fig vid" controls preload="metadata" poster="img/teaser.webp" src="video/persistworld.mp4"></video>
+</section>
+
+<section class="wrap block" id="bib">
+  <p class="eyebrow">Citation</p>
+  <h2>BibTeX <button id="copy-bib" class="btn small ghost">Copy</button></h2>
+<pre id="bibtex">@article{wang2026persistworld,
+  title   = {Write, Evolve, Read: Streaming Cameras into a Persistent
+             World State for 4D Occupancy Forecasting},
+  author  = {Wang, ZiAn and Wang, Tianyi and Chen, Zhihao and Cui, Manni
+             and Chen, Junkai and Chen, ZhiJin and Liu, Ruiqi and Wu, Junfei
+             and Zhang, Huanyu and Wu, Shu},
+  journal = {arXiv preprint},
+  year    = {2026}
+}</pre>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">Scenes and camera images: nuScenes (CC BY-NC-SA 4.0) with Occ3D-nuScenes occupancy labels.</div>
+</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

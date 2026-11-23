@@ -1,0 +1,10 @@
+# Environment of the released models: Python 3.11, CUDA 13.0, A800 GPUs.
+# Install the CUDA build of torch for your system first (it brings triton), e.g.
+#   pip install torch==2.13.0 --index-url https://download.pytorch.org/whl/cu130
+torch==2.13.0
+transformers==4.57.6
+safetensors==0.8.0
+numpy==2.3.5
+pillow==12.3.0
+# only to write the official scene split once (tools/prepare_occ3d.py):
+# nuscenes-devkit

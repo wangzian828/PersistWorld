@@ -1,0 +1,63 @@
+{
+ "dataset": "occ3d_nuscenes",
+ "input": "camera",
+ "model": {
+  "dim": 384,
+  "heads": 6,
+  "evolver_layers": 3,
+  "context_layers": 3,
+  "writer_layers": 2,
+  "state_shape": [50, 50, 4],
+  "occupancy_shape": [200, 200, 16],
+  "bounds": [-40, -40, -1, 40, 40, 5.4],
+  "groups_per_write": 4,
+  "num_classes": 18,
+  "free_id": 17,
+  "tile_shape": [10, 10, 4],
+  "halo": 1,
+  "depth_bins": 75,
+  "depth_bin_size": 0.8
+ },
+ "encoder": {
+  "kind": "dinov3_vitb16",
+  "checkpoint": "models/dinov3-vitb16-pretrain-lvd1689m",
+  "image_batch_size": 6,
+  "tune_blocks": 4,
+  "weights_sha256": "9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b",
+  "config_sha256": "3c9cc418f4622fd6d5587fd142b6f3cba0ba6a69f67ced907d8b7f26118451ec"
+ },
+ "objective": {
+  "class_priors": [0.00043682720442799356, 0.001024968809709626, 9.244899149366239e-05, 0.0011672297329005446, 0.009464964256609979, 0.0003606395544131331, 7.699534605306938e-05, 0.0013405683762639992, 0.00021149392409789905, 0.0012690780280703124, 0.003510203190961829, 0.07903719784117667, 0.0023694495182726752, 0.02279260574757204, 0.024384297510360847, 0.051938158089286986, 0.05227920250079159, 0.7482436713775371],
+  "free_weight": 4.0,
+  "loss_scale": 2.294903552232971,
+  "current_weight": 0.25
+ },
+ "data": {
+  "metadata_root": "occ3d_nuscenes/raw_nuscenes/extracted/v1.0-trainval",
+  "image_root": "occ3d_nuscenes/raw_nuscenes/extracted",
+  "occ_root": "occ3d_nuscenes/extracted/gts",
+  "split_file": "occ3d_nuscenes/official_splits.json",
+  "image_hw": [256, 704],
+  "history_groups": 8,
+  "long_horizons": [4, 5, 6, 7, 8],
+  "eval_horizons": [1, 2, 3]
+ },
+ "train": {
+  "epochs": 20,
+  "lr": 0.0003,
+  "backbone_lr_scale": 0.3333333333333333,
+  "warmup_updates": 4,
+  "decay_from_epoch": 16,
+  "decay_floor": 0.3333333333333333,
+  "grad_clip": 5.0,
+  "seed": 41,
+  "loss_points_per_update": 64,
+  "min_segments": 16,
+  "plan_world": 6,
+  "window": 8,
+  "tbptt": 2,
+  "depth_weights": [1, 1, 1, 1, 1, 1, 1, 1],
+  "augment": true
+ },
+ "execution": {}
+}

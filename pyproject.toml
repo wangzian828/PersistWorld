@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "persistworld"
+version = "1.0.0"
+description = "Write, Evolve, Read: Streaming Cameras into a Persistent World State for 4D Occupancy Forecasting"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+# torch: install the CUDA build for your system first (see README). Minimum versions; requirements.txt pins the
+# training environment.
+dependencies = [
+    "torch>=2.13",
+    "transformers>=4.56,<5",
+    "safetensors",
+    "numpy",
+    "pillow",
+]
+
+[project.optional-dependencies]
+data = ["nuscenes-devkit"]   # only tools/prepare_occ3d.py
+
+[tool.setuptools.packages.find]
+include = ["persistworld*"]

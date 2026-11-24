@@ -8,7 +8,7 @@ ZhiJin Chen<sup>4</sup>, Ruiqi Liu<sup>4</sup>, Junfei Wu<sup>4</sup>, Huanyu Zh
 <sup>1</sup>Jilin University, <sup>2</sup>Shanghai Jiao Tong University, <sup>3</sup>Huazhong University of Science and
 Technology, <sup>4</sup>Institute of Automation, Chinese Academy of Sciences. <sup>†</sup>Corresponding author.
 
-[Project page](https://wangzian828.github.io/PersistWorld) · [Weights](https://huggingface.co/ZiAnwang/PersistWorld) · Paper: arXiv (link follows)
+[Project page](https://wangzian828.github.io/PersistWorld) · [Weights](https://huggingface.co/ZiAnwang/PersistWorld) · [Paper](https://arxiv.org/abs/2611.30573)
 
 PersistWorld streams camera frames into a 3D world state anchored in the scene. When a capture group of
 surround-view images arrives, the **Evolver** carries the state to its capture time, the **Writer** writes the
@@ -181,7 +181,7 @@ python tests/test_cpu_smoke.py   # CPU, no data: streaming steps, loss and backw
   title   = {Write, Evolve, Read: Streaming Cameras into a Persistent World State for 4D Occupancy Forecasting},
   author  = {Wang, ZiAn and Wang, Tianyi and Chen, Zhihao and Cui, Manni and Chen, Junkai and Chen, ZhiJin
              and Liu, Ruiqi and Wu, Junfei and Zhang, Huanyu and Wu, Shu},
-  journal = {arXiv preprint},
+  journal = {arXiv preprint arXiv:2611.30573},
   year    = {2026}
 }
 ```

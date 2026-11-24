@@ -177,12 +177,14 @@ python tests/test_cpu_smoke.py   # CPU, no data: streaming steps, loss and backw
 ## Citation
 
 ```bibtex
-@article{wang2026persistworld,
-  title   = {Write, Evolve, Read: Streaming Cameras into a Persistent World State for 4D Occupancy Forecasting},
-  author  = {Wang, ZiAn and Wang, Tianyi and Chen, Zhihao and Cui, Manni and Chen, Junkai and Chen, ZhiJin
-             and Liu, Ruiqi and Wu, Junfei and Zhang, Huanyu and Wu, Shu},
-  journal = {arXiv preprint arXiv:2611.30573},
-  year    = {2026}
+@misc{wang2026writeevolvereadstreaming,
+      title={Write, Evolve, Read: Streaming Cameras into a Persistent World State for 4D Occupancy Forecasting},
+      author={ZiAn Wang and Tianyi Wang and Zhihao Chen and Manni Cui and Junkai Chen and ZhiJin Chen and Ruiqi Liu and Junfei Wu and Huanyu Zhang and Shu Wu},
+      year={2026},
+      eprint={2611.30573},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2611.30573},
 }
 ```
 
